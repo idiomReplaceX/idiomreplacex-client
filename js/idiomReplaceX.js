@@ -1,4 +1,4 @@
-idiomReplaceXHeader = function() {
+idiomReplaceXUI = function() {
   var bar = document.createElement('div');
   bar.innerHTML = '<h1 style="margin-top: 10px; text-align: center;">IdiomReplaceX</h1>';
   bar.style.position = "absolute";
@@ -13,5 +13,5 @@ idiomReplaceXHeader = function() {
 
 document.addEventListener("DOMContentLoaded", (event) => {
   console.log('DOM is ready.')
-  idiomReplaceXHeader();
+  idiomReplaceXUI();
 });
