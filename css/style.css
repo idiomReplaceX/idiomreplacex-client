@@ -1,0 +1,18 @@
+#idiomReplaceXUI {
+    background-color: purple;
+    color: white;
+    position: fixed;
+    top: 75vh;
+    width: 200px;
+    left: -10px; /*220px;*/
+    z-index: 2147483647; /* allowed max value, see https://stackoverflow.com/questions/491052/minimum-and-maximum-value-of-z-index */
+    border-radius: 0px 20px 20px 0px;
+    box-shadow: 5px 5px 5px grey;
+}
+
+#idiomReplaceXUI h3 {
+    color: white;
+    margin-top: 15px;
+    padding-right: 10px;
+    text-align: right;
+}
