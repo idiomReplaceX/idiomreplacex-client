@@ -63,7 +63,7 @@
    */
   let isTextBlock = function (node){
     // https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType
-    if(node.nodeType == Node.ELEMENT_NODE){
+    if(node.nodeType == Node.ELEMENT_NODE && node.innerText != undefined){ // e.g. svg nodes have no innerText
       var computedStyle = window.getComputedStyle(node);
       return (computedStyle.display.indexOf('block') >= 0);
     }
@@ -89,9 +89,12 @@
         //console.log(node.tagName + ": " + node.innerText);
           return {
             htmlChecksum: b_crc32(node.innerHTML),
-            innerText: node.innerText,
+            innerText: node.innerText.slice(), // assure the string is copied and not passed by reference
             node: node,
-            children: []
+            children: [],
+            toString : function () {
+              return "<" + this.node.tagName + " : " + this.htmlChecksum + ">";
+            }
         }
       }
     }
@@ -109,7 +112,7 @@
   const innerTexts = [];
   subTextBlocks.forEach(function(subBlock){
     if(subBlock.innerText.length > 0) {
-      innerTexts.push(subBlock.innerText);
+      innerTexts.push(subBlock.innerText.trim());
     }
     innerTexts.push(...collectSubTreeInnerTexts(subBlock.children));
   });
@@ -145,35 +148,48 @@
     siblingNodes.forEach(function(siblingNode) {
       // 1. descend into children
       let childrenTexBlocks = findTextBlockElements(siblingNode.childNodes);
-      console.log("--------------> childrenTexBlocks has " + childrenTexBlocks.length + " items");
+      // console.log("--------------> childrenTexBlocks has " + childrenTexBlocks.length + " items");
       // 2. process the sibling node
-      var siblingTextBlock = textContainerData(siblingNode);
+      let siblingTextBlock = textContainerData(siblingNode);
       if(siblingTextBlock) {
         let childTextLength = 0;
         childTextLength = childrenTexBlocks.reduce((sum, subTextBlock) => sum + subTextBlock.innerText.length, childTextLength);
-        if(siblingTextBlock.innerText.length > childTextLength){
-
-          // childrenTexBlocks.forEach(function(subTextBlock) {reduceToSignificantBlockText(subTextBlock, this)}, siblingTextBlock);
+        if(siblingTextBlock.innerText === undefined){
+          console.warn("siblingTextBlock.innerText is undefined!" + siblingTextBlock);
+        } else if(siblingTextBlock.innerText.length >= childTextLength){
+          let debugSearchText = "XXXDas protokollarisch zweithöchste";
+          let debugThisSibling = siblingTextBlock.innerText.indexOf(debugSearchText) == 0;
           collectSubTreeInnerTexts(childrenTexBlocks)
             .sort(compareByTextLength)
             .forEach(function(subBlockText) {
+              let debugThisSubBlockText = debugThisSibling && subBlockText.indexOf(debugSearchText) == 0;
+              if(debugThisSubBlockText){
+                console.log("siblingText " + siblingTextBlock.toString() + "[" + siblingTextBlock.innerText.length + "]:" + siblingTextBlock.innerText);
+                console.log("subBlockText [" + subBlockText.length + "]:" + subBlockText);
+              }
               siblingTextBlock.innerText = siblingTextBlock.innerText.replace(subBlockText, '');
+              if(debugThisSubBlockText) {
+                console.log("replaced siblingText " + siblingTextBlock.toString() + "[" + siblingTextBlock.innerText.length + "]:" + siblingTextBlock.innerText);
+              }
             });
-          console.log("(1) TextBlock <" + siblingTextBlock.node.tagName + "> : " + siblingTextBlock.innerText);
+          siblingTextBlock.innerText = siblingTextBlock.innerText.trim();
+          if(debugThisSibling) {
+            console.log("(1) " + siblingTextBlock.toString() + " : " + siblingTextBlock.innerText);
+          }
         }
       }
       if( siblingTextBlock && siblingTextBlock.innerText.length > 0) {
-        console.log("(1) adding TextBlock (length= " +siblingTextBlock.innerText.length + ") to siblingTextBlocks");
+        // console.log("(1) adding TextBlock (length= " +siblingTextBlock.innerText.length + ") to siblingTextBlocks");
         siblingTextBlock.children = childrenTexBlocks;
         siblingTextBlocks.push(siblingTextBlock);
       } else {
         if(childrenTexBlocks.length > 0){
-          console.log("(1) adding " + childrenTexBlocks.length + " childrenTexBlocks to  siblingTextBlocks");
+          // console.log("(1) adding " + childrenTexBlocks.length + " childrenTexBlocks to  siblingTextBlocks");
           siblingTextBlocks = siblingTextBlocks.concat(childrenTexBlocks);
         }
       }
     });
-    console.log("(1) siblingTextBlocks.length = "+ siblingTextBlocks.length);
+    // console.log("(1) siblingTextBlocks.length = "+ siblingTextBlocks.length);
     return siblingTextBlocks;
   };
 
@@ -193,7 +209,7 @@
 
   /**
    * Global function which provides the list of block elements which contain text which is
-   * relevant for the fransformation through the IdiomReplaceX filters.
+   * relevant for the transformation through the IdiomReplaceX filters.
    *
    * @param debug
    * @returns {*[]}
@@ -206,14 +222,14 @@
       if (textBlockData.innerText && countWords(textBlockData.innerText) > window.idiomReplaceX.minWordThreshold) {
         relevantTextBlocks.push(textBlockData);
         if(debug){
-          console.log("(2) TextBlock <" + textBlockData.node.tagName + "> : " + textBlockData.innerText );
+          console.debug("(2) " + textBlockData.toString() + " : " + textBlockData.innerText );
           textBlockData.node.style.backgroundColor = 'rgba(255,255,0,0.2)'
           textBlockData.node.style.border = '1px dashed red';
           textBlockData.node.style.paddingLeft = '20px';
           textBlockData.node.addEventListener('click', function(event){
-            var infoblock = document.createElement('div');
-            infoblock.innerHTML = 'innerText.length: ' + textBlockData.innerText.length + ', words: ' + countWords(textBlockData.innerText) + '<br>text:<small>' +  textBlockData.innerText + '</small>';
-            event.target.appendChild(infoblock);
+            let infoBlock = document.createElement('div');
+            infoBlock.innerHTML = 'innerText.length: ' + textBlockData.innerText.length + ', words: ' + countWords(textBlockData.innerText) + '<br>text:<small>' +  textBlockData.innerText + '</small>';
+            event.target.appendChild(infoBlock);
             event.stopPropagation();
           });
         }
