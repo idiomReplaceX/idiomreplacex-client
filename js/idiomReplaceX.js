@@ -10,14 +10,15 @@
 
 ;(function(document, window, undefined) {
 
-  const minWordThreshold = 5;
+  window.idiomReplaceX = {};
 
+  window.idiomReplaceX.minWordThreshold = 5;
   /**
    * Global function to add the idiomReplaceX UI to a web page.
    *
    * @param baseURL the base URLs of the location where the idiomreplacex-client scripts are hosted
    */
-  window.idiomReplaceXUI = function(baseURL) {
+  window.idiomReplaceX.ui = function(baseURL) {
     var styleEl = document.createElement('link');
     styleEl.setAttribute("rel", "stylesheet");
     styleEl.setAttribute("type", "text/css");
@@ -197,11 +198,12 @@
    * @param debug
    * @returns {*[]}
    */
-  window.idiomReplaceXU_extractTextBlocks = function(debug = false){
+  window.idiomReplaceX.extractTextBlocks = function(debug = false){
+
     let relevantTextBlocks = [];
     let textBlockElements = flattenTextBlockTree(findTextBlockElements(document.body.childNodes), []);
     textBlockElements.forEach(function(textBlockData){
-      if (textBlockData.innerText && countWords(textBlockData.innerText) > minWordThreshold) {
+      if (textBlockData.innerText && countWords(textBlockData.innerText) > window.idiomReplaceX.minWordThreshold) {
         relevantTextBlocks.push(textBlockData);
         if(debug){
           console.log("(2) TextBlock <" + textBlockData.node.tagName + "> : " + textBlockData.innerText );
@@ -222,5 +224,5 @@
 
 })(document, window);
 
-// idiomReplaceXUI('https://bgbm14463lap/');
-// idiomReplaceXU_extractTextBlocks(true);
+// idiomReplaceX.ui('https://bgbm14463lap/');
+// idiomReplaceX.extractTextBlocks(true);

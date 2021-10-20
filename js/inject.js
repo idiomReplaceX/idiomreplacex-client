@@ -3,8 +3,9 @@
   script.type = 'text/javascript';
   script.async = true;
   script.onload = function(){
-    idiomReplaceXUI(clientScriptsBaseUrl);
-    idiomReplaceXU_extractTextBlocks(true);
+    idiomReplaceX.ui(clientScriptsBaseUrl);
+    // idiomReplaceX.minWordThreshold = 2;
+    idiomReplaceX.extractTextBlocks(true);
   };
   script.src = clientScriptsBaseUrl + 'js/idiomReplaceX.js';
   d.getElementsByTagName('head')[0].appendChild(script);
