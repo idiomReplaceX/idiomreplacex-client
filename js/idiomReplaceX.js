@@ -147,7 +147,26 @@
     let siblingTextBlocks = [];
     siblingNodes.forEach(function(siblingNode) {
       // 1. descend into children
-      let childrenTexBlocks = findTextBlockElements(siblingNode.childNodes);
+      let childrenTexBlocks = [];
+      if(siblingNode.nodeName == 'IFRAME'){
+        // Can not yet properly handle DOM errors in case of cross domain origin access to the iframe document
+        // therefore below code is commented:
+        // -----------------------------------------------------------------------------------------------------
+        // console.log("IFRAME.document:" + siblingNode.contentWindow.document.childNodes);
+        // let iframeDocument = siblingNode.contentWindow.document.catch(function(error) {
+        //   console.error("Can't access IFRAME content: " + error);
+        // });
+        // if(iframeDocument){
+        //   let iframeBodyChildNodes = siblingNode.contentWindow.document.body.childNodes;
+        //   if(!iframeBodyChildNodes) {
+        //     console.warn("IFRAME.document.childNodes is empty");
+        //   } else {
+        //     childrenTexBlocks = findTextBlockElements(iframeBodyChildNodes);
+        //   }
+        // }
+      } else {
+        childrenTexBlocks = findTextBlockElements(siblingNode.childNodes);
+      }
       // console.log("--------------> childrenTexBlocks has " + childrenTexBlocks.length + " items");
       // 2. process the sibling node
       let siblingTextBlock = textContainerData(siblingNode);
