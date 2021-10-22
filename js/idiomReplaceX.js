@@ -21,6 +21,8 @@
     };
   }
 
+  let cookieName= "idiomReplaceXMethod";
+
   let methodSelectElement = null;
 
   /**
@@ -48,6 +50,10 @@
     document.body.appendChild(bar);
     methodSelectElement = bar.querySelector("#idiomreplacex-method");
     fetchMethodOptions(methodSelectElement);
+    methodSelectElement.addEventListener('change', function(event){
+      setCookie(cookieName, event.target.value, 10);
+      window.location.reload(false);
+    })
   }
 
   let fetchMethodOptions = function(selectElement){
@@ -58,9 +64,38 @@
         option.setAttribute('name', methodName);
         option.innerText = methodName;
         selectElement.appendChild(option);
-      })
+      });
+      let defaultOption = getCookie(cookieName);
+      if(defaultOption){
+        selectElement.value = defaultOption;
+      }
+
     })
   }
+
+  function setCookie(name,value,days) {
+    var expires = "";
+    if (days) {
+      var date = new Date();
+      date.setTime(date.getTime() + (days*24*60*60*1000));
+      expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+  }
+  function getCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+      var c = ca[i];
+      while (c.charAt(0)==' ') c = c.substring(1,c.length);
+      if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+  }
+  function eraseCookie(name) {
+    document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+  }
+
 
   /**
    * Calculates a crc32 checksum for the given text
@@ -295,18 +330,17 @@
     return relevantTextBlocks;
   }
 
-// --------------------------- the request and filter function ---------------------- //
-  /**
-   * @param array textBlocks
-   */
+  // --------------------------- the request and filter function ---------------------- //
+
   window.idiomReplaceX.requestForReplaceX = function(){
     Object.values(window.idiomReplaceX.relevantTextBlocks).forEach(function (textBlock) {
       let payload = JSON.stringify({'html': textBlock.node.innerHTML.normalize(), 'htmlChecksum' : textBlock.htmlChecksum});
-      let filterMethod = '';
-      if(methodSelectElement.value){
-        filterMethod = '/' + methodSelectElement.value;
+      let serviceMethod = "filter";
+      let filter = getCookie(cookieName);
+      if(filter){
+        serviceMethod += '/' + filter;
       }
-      jsonQuery( "POST",  "filter" + filterMethod , payload, window.idiomReplaceX.applyReplaceX);
+      jsonQuery( "POST",  serviceMethod, payload, window.idiomReplaceX.applyReplaceX);
     })
   }
 
