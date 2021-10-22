@@ -1,10 +1,4 @@
 /*
- * use like e.g.:
- *
-    document.addEventListener("DOMContentLoaded", (event) => {
-      idiomReplaceXUI("https://idiomReplaceX.de/client/");
-      console.log('DOM is ready.')
-    });
  *
  */
 
@@ -284,12 +278,6 @@
     })
   }
 
-  let characterLength = function (str) {
-    // The string iterator that is used here iterates over characters,
-    //  not mere code units
-    return [...str].length;
-  }
-
   window.idiomReplaceX.applyReplaceX = function(replaceData){
     // console.log(JSON.stringify(replaceToken));
     let textBlock = window.idiomReplaceX.relevantTextBlocks[replaceData.htmlChecksum];
@@ -332,6 +320,3 @@
   }
 
 })(document, window);
-
-// idiomReplaceX.ui('https://bgbm14463lap/');
-// idiomReplaceX.extractTextBlocks(true);
