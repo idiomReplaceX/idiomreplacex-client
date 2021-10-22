@@ -1,18 +1,65 @@
+/**
+ * http://colormind.io/
+
+    let colors = {
+    "pink": "CA0D9B",
+    "whitish": "FCF8FC",
+    "alt" : "3E8698",
+    "blue" : "2B3F40",
+    "dark" : "191717"
+    }
+ */
+
 #idiomReplaceXUI {
-    background-color: purple;
-    color: white;
+    background-color: #FCF8FC;
+    color: #2B3F40;
     position: fixed;
     top: 75vh;
-    width: 200px;
-    left: -10px; /*220px;*/
+    width: 400px;
+    left: -300px; /* logo only, to become fully visible: - 400px + 320px = -80px
+
     z-index: 2147483647; /* allowed max value, see https://stackoverflow.com/questions/491052/minimum-and-maximum-value-of-z-index */
     border-radius: 0px 20px 20px 0px;
-    box-shadow: 5px 5px 5px grey;
+    box-shadow: 0px 0px 30px #CA0D9B70;
 }
 
-#idiomReplaceXUI h3 {
-    color: white;
-    margin-top: 15px;
-    padding-right: 10px;
-    text-align: right;
+#idiomReplaceXUI a, #idiomReplaceXUI a:visited, #idiomReplaceXUI a:active {
+    color: #CA0D9B;
+}
+#idiomReplaceXUI a:hover {
+    color: #3E8698;
+}
+
+#idiomReplaceXUI section {
+    display: flex;
+    flex-wrap: nowrap;
+    width: 100%;
+    justify-content: right;
+    align-items: center;
+}
+
+#idiomReplaceXUI .form-container {
+    padding-left: 20px;
+}
+#idiomReplaceXUI select {
+    width: 200px;
+    font-size: 20px;
+}
+
+#idiomReplaceXUI select option, #idiomReplaceXUI label { /* aligning label and select element text */
+    padding-left: 5px;
+}
+#idiomReplaceXUI label {
+    padding-bottom: 10px;
+    display: block;
+}
+
+#idiomReplaceXUI img.logo {
+    height: 100px;
+    width: 100px;
+}
+
+#idiomReplaceXUI img.logo:hover {
+    filter: invert(1);
+    cursor: pointer;
 }

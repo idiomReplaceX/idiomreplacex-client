@@ -1,5 +1,6 @@
 /*
  *
+ *
  */
 
 ;(function(document, window, undefined) {
@@ -9,6 +10,7 @@
   window.idiomReplaceX.minWordThreshold = 5;
   window.idiomReplaceX.filterServiceBaseUrl = null;
   window.idiomReplaceX.relevantTextBlocks = {};
+
   window.idiomReplaceX.TextBlock = function(node){
     this.htmlChecksum = b_crc32(node.innerHTML);
     this.innerText = node.innerText.slice(); // assure the string is copied and not passed by reference
@@ -18,6 +20,8 @@
       return "<" + this.node.tagName + " : " + this.htmlChecksum + ">";
     };
   }
+
+  let methodSelectElement = null;
 
   /**
    * Global function to add the idiomReplaceX UI to a web page.
@@ -32,8 +36,30 @@
     document.head.appendChild(styleEl);
     var bar = document.createElement('div');
     bar.setAttribute('id', 'idiomReplaceXUI')
-    bar.innerHTML = '<h3>IdiomReplaceX</h3>';
+    // bar.innerHTML = '<h3>IdiomReplaceX</h3>';
+    bar.innerHTML = '<section><div class="form-container">' +
+      '<label for="idiomreplacex-method"><a href="#">IdiomReplaceX</a> method:</label>' +
+      '<form><select id="idiomreplacex-method" name="method">' +
+      '<option value="" selected>initializing ...</option>' +
+      '</select></form></div><div id="idiomreplacex-logo-container" class="logo-container"><img class="logo" src="' + baseURL + '/image/irx-logo.png" /></div></section>';
+    bar.querySelector("#idiomreplacex-logo-container").addEventListener('click', function(event){
+      bar.style.left = bar.style.left == '-80px' ? '-300px' : '-80px';
+    });
     document.body.appendChild(bar);
+    methodSelectElement = bar.querySelector("#idiomreplacex-method");
+    fetchMethodOptions(methodSelectElement);
+  }
+
+  let fetchMethodOptions = function(selectElement){
+    jsonQuery("GET",  "methods", null, function(jsonData){
+      selectElement.innerHTML = "";
+      jsonData.forEach(function(methodName){
+        let option = document.createElement("option");
+        option.setAttribute('name', methodName);
+        option.innerText = methodName;
+        selectElement.appendChild(option);
+      })
+    })
   }
 
   /**
@@ -59,7 +85,21 @@
     return str.split(' ').length;
   }
 
-
+  function jsonQuery(httpMethod, serviceMethod, payload, successCallBack) {
+    let xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function () {
+      if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+        try {
+          let jsonData = JSON.parse(xmlHttp.responseText);
+          successCallBack(jsonData);
+        } catch (syntaxError) {
+          console.error(syntaxError + ' DATA: ' + xmlHttp.responseText);
+        }
+    }
+    xmlHttp.open(httpMethod, window.idiomReplaceX.filterServiceBaseUrl + serviceMethod, true); // true for asynchronous
+    xmlHttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xmlHttp.send(payload);
+  }
 
   /**
    * Matches nodes which are ELEMENT_NODE and displayed with an outer display type of 'block'.
@@ -255,26 +295,18 @@
     return relevantTextBlocks;
   }
 
-  // --------------------------- the request and filter function ---------------------- //
+// --------------------------- the request and filter function ---------------------- //
   /**
    * @param array textBlocks
    */
   window.idiomReplaceX.requestForReplaceX = function(){
     Object.values(window.idiomReplaceX.relevantTextBlocks).forEach(function (textBlock) {
-      let xmlHttp = new XMLHttpRequest();
-      xmlHttp.onreadystatechange = function() {
-        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
-          try {
-            let replaceData = JSON.parse(xmlHttp.responseText);
-            window.idiomReplaceX.applyReplaceX(replaceData);
-          } catch (syntaxError) {
-            console.error(syntaxError + ' DATA: ' + xmlHttp.responseText);
-          }
-      }
-      xmlHttp.open("POST", idiomReplaceX.filterServiceBaseUrl + 'filter', true); // true for asynchronous
-      xmlHttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
       let payload = JSON.stringify({'html': textBlock.node.innerHTML.normalize(), 'htmlChecksum' : textBlock.htmlChecksum});
-      xmlHttp.send(payload);
+      let filterMethod = '';
+      if(methodSelectElement.value){
+        filterMethod = '/' + methodSelectElement.value;
+      }
+      jsonQuery( "POST",  "filter" + filterMethod , payload, window.idiomReplaceX.applyReplaceX);
     })
   }
 
