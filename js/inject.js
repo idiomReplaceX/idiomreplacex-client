@@ -6,7 +6,8 @@
     idiomReplaceX.ui(clientScriptsBaseUrl);
     // idiomReplaceX.minWordThreshold = 2;
     idiomReplaceX.filterServiceBaseUrl = filterServiceBaseUrl;
-    idiomReplaceX.extractTextBlocks(true);
+    var debug = false;
+    idiomReplaceX.extractTextBlocks(debug);
     idiomReplaceX.requestForReplaceX();
   };
   script.src = clientScriptsBaseUrl + 'js/idiomReplaceX.js';
