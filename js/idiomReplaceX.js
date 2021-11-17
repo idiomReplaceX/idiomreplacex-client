@@ -39,11 +39,11 @@
     var bar = document.createElement('div');
     bar.setAttribute('id', 'idiomReplaceXUI')
     // bar.innerHTML = '<h3>IdiomReplaceX</h3>';
-    bar.innerHTML = '<section><div class="form-container">' +
+    bar.innerHTML = '<section><div id="idiomreplacex-logo-container" class="logo-container"><img class="logo" src="' + baseURL + '/image/irx-logo.png" /></div><div class="form-container">' +
       '<label for="idiomreplacex-method"><a href="#">IdiomReplaceX</a> method:</label>' +
       '<form><select id="idiomreplacex-method" name="method">' +
       '<option value="" selected>initializing ...</option>' +
-      '</select></form></div><div id="idiomreplacex-logo-container" class="logo-container"><img class="logo" src="' + baseURL + '/image/irx-logo.png" /></div></section>';
+      '</select></form></div></section>';
     bar.querySelector("#idiomreplacex-logo-container").addEventListener('click', function(event){
       bar.style.left = bar.style.left == '-80px' ? '-300px' : '-80px';
     });
@@ -200,14 +200,14 @@
    * @returns {number}
    */
   var compareByTextLength = function(textA, textB) {
-  if(textA.length === textB.length){
-    return 0;
-  } else if (textA.length > textB.length){
-    return -1;
-  } else {
-    return 1;
+    if(textA.length === textB.length){
+      return 0;
+    } else if (textA.length > textB.length){
+      return -1;
+    } else {
+      return 1;
+    }
   }
-}
 
   /**
    * This is the core text block extraction method. It walks the dom tree, descends first into its depths.

@@ -31,14 +31,15 @@
 }
 
 #idiomReplaceXUI section {
-    display: flex;
-    flex-wrap: nowrap;
+    display: block;
     width: 100%;
-    justify-content: right;
-    align-items: center;
 }
 
+#idiomReplaceXUI .logo-container {
+    float: right;
+}
 #idiomReplaceXUI .form-container {
+    float: right;
     padding-left: 20px;
 }
 #idiomReplaceXUI select {
