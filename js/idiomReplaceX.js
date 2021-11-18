@@ -49,14 +49,14 @@
     });
     document.body.appendChild(bar);
     methodSelectElement = bar.querySelector("#idiomreplacex-method");
-    fetchMethodOptions(methodSelectElement);
+    fetchMethodOptions(baseURL, methodSelectElement);
     methodSelectElement.addEventListener('change', function(event){
       setCookie(cookieName, event.target.value, 10);
       window.location.reload(false);
     })
   }
 
-  let fetchMethodOptions = function(selectElement){
+  let fetchMethodOptions = function(baseURL, selectElement){
     jsonQuery("GET",  "methods", null, function(jsonData){
       selectElement.innerHTML = "";
       jsonData.forEach(function(methodName){

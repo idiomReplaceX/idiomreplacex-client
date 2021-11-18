@@ -3,9 +3,9 @@
   script.type = 'text/javascript';
   script.async = true;
   script.onload = function(){
-    idiomReplaceX.ui(clientScriptsBaseUrl);
     // idiomReplaceX.minWordThreshold = 2;
     idiomReplaceX.filterServiceBaseUrl = filterServiceBaseUrl;
+    idiomReplaceX.ui(clientScriptsBaseUrl);
     var debug = false;
     idiomReplaceX.extractTextBlocks(debug);
     idiomReplaceX.requestForReplaceX();
