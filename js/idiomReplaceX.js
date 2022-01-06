@@ -5,7 +5,7 @@
 
 ;(function(document, window, undefined) {
 
-  let bindTo = document;
+  let bindTo = window;
   
   bindTo.idiomReplaceX = {};
 
@@ -54,7 +54,7 @@
     fetchMethodOptions(baseURL, methodSelectElement);
     methodSelectElement.addEventListener('change', function(event){
       setCookie(cookieName, event.target.value, 10);
-      bindTo.location.reload(false);
+      window.location.reload(false);
     })
   }
 
