@@ -5,13 +5,15 @@
 
 ;(function(document, window, undefined) {
 
-  window.idiomReplaceX = {};
+  let bindTo = document;
+  
+  bindTo.idiomReplaceX = {};
 
-  window.idiomReplaceX.minWordThreshold = 5;
-  window.idiomReplaceX.filterServiceBaseUrl = null;
-  window.idiomReplaceX.relevantTextBlocks = {};
+  bindTo.idiomReplaceX.minWordThreshold = 5;
+  bindTo.idiomReplaceX.filterServiceBaseUrl = null;
+  bindTo.idiomReplaceX.relevantTextBlocks = {};
 
-  window.idiomReplaceX.TextBlock = function(node){
+  bindTo.idiomReplaceX.TextBlock = function(node){
     this.htmlChecksum = b_crc32(node.innerHTML);
     this.innerText = node.innerText.slice(); // assure the string is copied and not passed by reference
     this.node = node;
@@ -30,7 +32,7 @@
    *
    * @param baseURL the base URLs of the location where the idiomreplacex-client scripts are hosted
    */
-  window.idiomReplaceX.ui = function(baseURL) {
+  bindTo.idiomReplaceX.ui = function(baseURL) {
     var styleEl = document.createElement('link');
     styleEl.setAttribute("rel", "stylesheet");
     styleEl.setAttribute("type", "text/css");
@@ -52,7 +54,7 @@
     fetchMethodOptions(baseURL, methodSelectElement);
     methodSelectElement.addEventListener('change', function(event){
       setCookie(cookieName, event.target.value, 10);
-      window.location.reload(false);
+      bindTo.location.reload(false);
     })
   }
 
@@ -131,7 +133,7 @@
           console.error(syntaxError + ' DATA: ' + xmlHttp.responseText);
         }
     }
-    xmlHttp.open(httpMethod, window.idiomReplaceX.filterServiceBaseUrl + serviceMethod, true); // true for asynchronous
+    xmlHttp.open(httpMethod, bindTo.idiomReplaceX.filterServiceBaseUrl + serviceMethod, true); // true for asynchronous
     xmlHttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xmlHttp.send(payload);
   }
@@ -168,7 +170,7 @@
     if(node) {
       if (isTextBlock(node)) {
         //console.log(node.tagName + ": " + node.innerText);
-          return new idiomReplaceX.TextBlock(node);
+          return new bindTo.idiomReplaceX.TextBlock(node);
       }
     }
     return null;
@@ -306,13 +308,13 @@
    * @param debug
    * @returns {*[]}
    */
-  window.idiomReplaceX.extractTextBlocks = function(debug = false){
+  bindTo.idiomReplaceX.extractTextBlocks = function(debug = false){
 
     let relevantTextBlocks = [];
     let textBlockElements = flattenTextBlockTree(findTextBlockElements(document.body.childNodes), []);
     textBlockElements.forEach(function(textBlockData){
-      if (textBlockData.innerText && countWords(textBlockData.innerText) > window.idiomReplaceX.minWordThreshold) {
-        window.idiomReplaceX.relevantTextBlocks[textBlockData.htmlChecksum] = textBlockData;
+      if (textBlockData.innerText && countWords(textBlockData.innerText) > bindTo.idiomReplaceX.minWordThreshold) {
+        bindTo.idiomReplaceX.relevantTextBlocks[textBlockData.htmlChecksum] = textBlockData;
         if(debug){
           console.debug("(2) " + textBlockData.toString() + " : " + textBlockData.innerText );
           textBlockData.node.style.backgroundColor = 'rgba(255,255,0,0.2)'
@@ -332,27 +334,27 @@
 
   // --------------------------- the request and filter function ---------------------- //
 
-  window.idiomReplaceX.requestForReplaceX = function(){
-    Object.values(window.idiomReplaceX.relevantTextBlocks).forEach(function (textBlock) {
+  bindTo.idiomReplaceX.requestForReplaceX = function(){
+    Object.values(bindTo.idiomReplaceX.relevantTextBlocks).forEach(function (textBlock) {
       let payload = JSON.stringify({'html': textBlock.node.innerHTML.normalize(), 'htmlChecksum' : textBlock.htmlChecksum});
       let serviceMethod = "filter";
       let filter = getCookie(cookieName);
       if(filter){
         serviceMethod += '/' + filter;
       }
-      jsonQuery( "POST",  serviceMethod, payload, window.idiomReplaceX.applyReplaceX);
+      jsonQuery( "POST",  serviceMethod, payload, bindTo.idiomReplaceX.applyReplaceX);
     })
   }
 
-  window.idiomReplaceX.applyReplaceX = function(replaceData){
+  bindTo.idiomReplaceX.applyReplaceX = function(replaceData){
     // console.log(JSON.stringify(replaceToken));
-    let textBlock = window.idiomReplaceX.relevantTextBlocks[replaceData.htmlChecksum];
+    let textBlock = bindTo.idiomReplaceX.relevantTextBlocks[replaceData.htmlChecksum];
     if(textBlock){
       let currentInnerHtmlChecksum = b_crc32(textBlock.node.innerHTML);
       if(currentInnerHtmlChecksum !== textBlock.htmlChecksum){
         console.info("TextBlock.innerHtml has changed meanwhile, skipping ...");
       } else {
-        window.idiomReplaceX.replaceInnerHTML(textBlock, replaceData.replaceTokens);
+        bindTo.idiomReplaceX.replaceInnerHTML(textBlock, replaceData.replaceTokens);
       }
     } else {
       console.warn("Received data for unknown text block: " + JSON.stringify(replaceToken));
@@ -370,7 +372,7 @@
             "token": string
         },
    */
-  window.idiomReplaceX.replaceInnerHTML = function(textBlock, replaceTokens){
+  bindTo.idiomReplaceX.replaceInnerHTML = function(textBlock, replaceTokens){
     let offset = 0;
     let chars = [...textBlock.node.innerHTML.normalize()]; // covert into unicode character array
     for(let i = 0; i < replaceTokens.length; i++) {
