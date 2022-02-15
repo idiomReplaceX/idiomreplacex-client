@@ -46,7 +46,7 @@
     bar.setAttribute('id', 'idiomReplaceXUI')
     // bar.innerHTML = '<h3>IdiomReplaceX</h3>';
     bar.innerHTML = '<section><div id="idiomreplacex-logo-container" class="logo-container"><img class="logo" src="' + baseURL + '/image/irx-logo.png" /></div><div class="form-container">' +
-      '<label for="idiomreplacex-method"><a href="#">IdiomReplaceX</a> method:</label>' +
+      '<label for="idiomreplacex-method"><a href="https://idiomreplacex.de">IdiomReplaceX</a> method:</label>' +
       '<form><select id="idiomreplacex-method" name="method">' +
       '<option value="" selected>initializing ...</option>' +
       '</select></form></div></section>';
