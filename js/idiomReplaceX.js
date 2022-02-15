@@ -2,16 +2,19 @@
  *
  *
  */
-
-;(function(document, window, undefined) {
+;
+(function(document, window, undefined) {
 
   let bindTo = window;
-  
+
   bindTo.idiomReplaceX = {};
 
   bindTo.idiomReplaceX.minWordThreshold = 5;
   bindTo.idiomReplaceX.filterServiceBaseUrl = null;
   bindTo.idiomReplaceX.relevantTextBlocks = {};
+  bindTo.idiomReplaceX.revertDataList = [];
+
+  const FILTERS_DISABLED = '-- disabled --';
 
   bindTo.idiomReplaceX.TextBlock = function(node){
     this.htmlChecksum = b_crc32(node.innerHTML);
@@ -26,6 +29,7 @@
   let cookieName= "idiomReplaceXMethod";
 
   let methodSelectElement = null;
+  let defaultFilter = undefined;
 
   /**
    * Global function to add the idiomReplaceX UI to a web page.
@@ -53,15 +57,26 @@
     methodSelectElement = bar.querySelector("#idiomreplacex-method");
     fetchMethodOptions(baseURL, methodSelectElement);
     methodSelectElement.addEventListener('change', function(event){
-      setCookie(cookieName, event.target.value, 10);
-      window.location.reload(false);
+      if(getCookie(cookieName) !== event.target.value){
+        setCookie(cookieName, event.target.value, 10);
+          bindTo.idiomReplaceX.requestForReplaceX();
+      }
     })
   }
 
   let fetchMethodOptions = function(baseURL, selectElement){
     jsonQuery("GET",  "methods", null, function(jsonData){
       selectElement.innerHTML = "";
+
+      let option = document.createElement("option");
+      option.setAttribute('name', FILTERS_DISABLED);
+      option.innerText = FILTERS_DISABLED;
+      selectElement.appendChild(option);
+
       jsonData.forEach(function(methodName){
+        if(defaultFilter == undefined){
+          defaultFilter = methodName;
+        }
         let option = document.createElement("option");
         option.setAttribute('name', methodName);
         option.innerText = methodName;
@@ -124,17 +139,26 @@
 
   function jsonQuery(httpMethod, serviceMethod, payload, successCallBack) {
     let xmlHttp = new XMLHttpRequest();
-    xmlHttp.onreadystatechange = function () {
-      if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+    // see https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Synchronous_and_Asynchronous_Requests
+    xmlHttp.open(httpMethod, bindTo.idiomReplaceX.filterServiceBaseUrl + serviceMethod, true); // true for asynchronous
+    xmlHttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xmlHttp.onload = function (e) {
+      if (xmlHttp.readyState === 4) {
+        if(xmlHttp.status === 200) {
         try {
           let jsonData = JSON.parse(xmlHttp.responseText);
           successCallBack(jsonData);
         } catch (syntaxError) {
           console.error(syntaxError + ' DATA: ' + xmlHttp.responseText);
         }
+        } else {
+          console.error("ERROR xmlHttp.status: " + xmlHttp.status);
+        }
+      }
     }
-    xmlHttp.open(httpMethod, bindTo.idiomReplaceX.filterServiceBaseUrl + serviceMethod, true); // true for asynchronous
-    xmlHttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xmlHttp.onerror = function (e) {
+      console.error(xmlHttp.statusText);
+    };
     xmlHttp.send(payload);
   }
 
@@ -147,7 +171,7 @@
   let isTextBlock = function (node){
     // https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType
     if(node.nodeType == Node.ELEMENT_NODE && node.innerText != undefined){ // e.g. svg nodes have no innerText
-      var computedStyle = window.getComputedStyle(node);
+      let computedStyle = window.getComputedStyle(node);
       return (computedStyle.display.indexOf('block') >= 0);
     }
     return false;
@@ -335,33 +359,64 @@
   // --------------------------- the request and filter function ---------------------- //
 
   bindTo.idiomReplaceX.requestForReplaceX = function(){
-    Object.values(bindTo.idiomReplaceX.relevantTextBlocks).forEach(function (textBlock) {
-      let payload = JSON.stringify({'html': textBlock.node.innerHTML.normalize(), 'htmlChecksum' : textBlock.htmlChecksum});
-      let serviceMethod = "filter";
-      let filter = getCookie(cookieName);
-      if(filter){
-        serviceMethod += '/' + filter;
-      }
-      jsonQuery( "POST",  serviceMethod, payload, bindTo.idiomReplaceX.applyReplaceX);
-    })
-  }
-
-  bindTo.idiomReplaceX.applyReplaceX = function(replaceData){
-    // console.log(JSON.stringify(replaceToken));
-    let textBlock = bindTo.idiomReplaceX.relevantTextBlocks[replaceData.htmlChecksum];
-    if(textBlock){
-      let currentInnerHtmlChecksum = b_crc32(textBlock.node.innerHTML);
-      if(currentInnerHtmlChecksum !== textBlock.htmlChecksum){
-        console.info("TextBlock.innerHtml has changed meanwhile, skipping ...");
-      } else {
-        bindTo.idiomReplaceX.replaceInnerHTML(textBlock, replaceData.replaceTokens);
-      }
-    } else {
-      console.warn("Received data for unknown text block: " + JSON.stringify(replaceToken));
+    // revert the page to original state (if revertDataList is not empty)
+    bindTo.idiomReplaceX.revertAllReplaceXments();
+    let filter = getCookie(cookieName);
+    if(filter === undefined){
+      filter = defaultFilter;
+    }
+    console.info("applying filter method: " + filter);
+    if(filter && filter !== FILTERS_DISABLED){
+      Object.values(bindTo.idiomReplaceX.relevantTextBlocks).forEach(function (textBlock) {
+        let payload = JSON.stringify({'html': textBlock.node.innerHTML.normalize(), 'htmlChecksum' : textBlock.htmlChecksum});
+        let serviceMethod = "filter";
+        if(filter){
+          serviceMethod += '/' + filter;
+        }
+        jsonQuery( "POST",  serviceMethod, payload, bindTo.idiomReplaceX.applyReplaceX);
+      })
     }
   }
 
+  bindTo.idiomReplaceX.applyReplaceX = function(replaceData, revertMode = false){
+    // console.log(JSON.stringify(replaceToken));
+    let textBlock = bindTo.idiomReplaceX.relevantTextBlocks[replaceData.htmlChecksum];
+    if(textBlock){
+      let checksum_match = true;
+      if(!revertMode){
+        let currentInnerHtmlChecksum = b_crc32(textBlock.node.innerHTML);
+        checksum_match = currentInnerHtmlChecksum == textBlock.htmlChecksum;
+      }
+      if(!checksum_match) {
+        console.info("TextBlock.innerHtml has changed meanwhile, skipping ...");
+      } else {
+        let revertTokens = bindTo.idiomReplaceX.replaceInnerHTML(textBlock, replaceData.replaceTokens);
+        if (!revertMode) {
+          bindTo.idiomReplaceX.revertDataList.push({
+            // htmlChecksum is no longer the checksum of the textBlock as it has just been modified
+            // but we are still using it as key to reference the block in the bindTo.idiomReplaceX.relevantTextBlocks
+            "htmlChecksum": replaceData.htmlChecksum,
+            "replaceTokens": revertTokens
+          });
+        }
+      }
+    } else {
+      console.warn("Received data for unknown text block: " + JSON.stringify(replaceData));
+    }
+    }
+
+    bindTo.idiomReplaceX.revertAllReplaceXments = function(){
+      // console.log(JSON.stringify(replaceToken));
+      bindTo.idiomReplaceX.revertDataList.forEach(function(replaceData, index, array) {
+        bindTo.idiomReplaceX.applyReplaceX(replaceData, true);
+      });
+      bindTo.idiomReplaceX.revertDataList = [];
+    }
+
   /**
+   * Apply the replaceTokens to the text block.
+   *
+   * It is assumed that the replaceTokens are ordered by the start field.
    *
    * @param textBlock
    * @param replaceTokens
@@ -370,13 +425,21 @@
             "replacement": string,
             "start": int,
             "token": string
-        },
+        }
+   * @return array of revertTokens which can be used to restore the original text
    */
   bindTo.idiomReplaceX.replaceInnerHTML = function(textBlock, replaceTokens){
+    let revertTokens = [];
     let offset = 0;
     let chars = [...textBlock.node.innerHTML.normalize()]; // covert into unicode character array
     for(let i = 0; i < replaceTokens.length; i++) {
       let rpToken = replaceTokens[i];
+      // create the token, which can be used to restore the original text
+      revertTokens.push({
+        "replacement": rpToken.token,
+        "token": rpToken.replacement,
+        "start": rpToken.start + offset
+      });
       let tokenChars = [...rpToken.token];
       let replacementChars = [...rpToken.replacement];
       let partAChars = chars.slice(0, rpToken.start + offset);
@@ -385,6 +448,7 @@
       offset = offset + (replacementChars.length - tokenChars.length);
     };
     textBlock.node.innerHTML = chars.join("");
+    return revertTokens;
   }
 
 })(document, window);
