@@ -14,7 +14,6 @@
     background-color: #FCF8FC;
     color: #2B3F40;
     position: fixed;
-    z-index: 1000;
     top: 75vh;
     width: 400px;
     left: -300px; /* logo only, to become fully visible: - 400px + 320px = -80px */
