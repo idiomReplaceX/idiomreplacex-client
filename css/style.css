@@ -17,7 +17,7 @@
     z-index: 1000;
     top: 75vh;
     width: 400px;
-    left: -300px; /* logo only, to become fully visible: - 400px + 320px = -80px
+    left: -300px; /* logo only, to become fully visible: - 400px + 320px = -80px */
 
     z-index: 2147483647; /* allowed max value, see https://stackoverflow.com/questions/491052/minimum-and-maximum-value-of-z-index */
     border-radius: 0px 20px 20px 0px;
