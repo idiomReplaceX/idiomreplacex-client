@@ -58,6 +58,10 @@
 #idiomReplaceXUI img.logo {
     height: 100px;
     width: 100px;
+    min-width: min-content;
+    max-width: max-content;
+    min-height: min-content;
+    max-height: max-content;
 }
 
 #idiomReplaceXUI img.logo:hover {
