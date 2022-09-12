@@ -6,4 +6,4 @@ idiomReplaceX.filterServiceBaseUrl = filterServiceBaseUrl;
 idiomReplaceX.ui(clientScriptsBaseUrl);
 let debug = false;
 idiomReplaceX.extractTextBlocks(debug);
-idiomReplaceX.requestForReplaceX();
+// idiomReplaceX.requestForReplaceX(); now called in idiomReplaceX.fetchMethodOptions()

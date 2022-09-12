@@ -62,18 +62,6 @@
     methodSelectElement.addEventListener('change', function(event){
       if(getCookie(cookieName) !== event.target.value){
         setCookie(cookieName, event.target.value, 10);
-        metadataDiv.innerText = '';
-        let methodData = methodDataList.find(function(item){
-          return item.name == event.target.value;
-        });
-        if(methodData){
-          if (methodData.author){
-            metadataDiv.innerText = 'by ' + methodData.author;
-          }
-          if (methodData.year){
-            metadataDiv.innerText += ' ' + methodData.year;
-          }
-        }
         bindTo.idiomReplaceX.requestForReplaceX();
       }
     })
@@ -83,7 +71,6 @@
     jsonQuery("GET",  "v2/methods", null, function(jsonData){
 
       methodDataList = jsonData;
-
       selectElement.innerHTML = "";
 
       let option = document.createElement("option");
@@ -105,7 +92,7 @@
       if(defaultOption){
         selectElement.value = defaultOption;
       }
-
+      bindTo.idiomReplaceX.requestForReplaceX();
     })
   }
 
@@ -383,6 +370,18 @@
     let filter = getCookie(cookieName);
     if(filter === undefined){
       filter = defaultFilter;
+    }
+    metadataDiv.innerText = '';
+    let methodData = methodDataList.find(function(item){
+      return item.name == filter;
+    });
+    if(methodData){
+      if (methodData.author){
+        metadataDiv.innerText = 'by ' + methodData.author;
+      }
+      if (methodData.year){
+        metadataDiv.innerText += ' ' + methodData.year;
+      }
     }
     console.info("applying filter method: " + filter);
     if(filter && filter !== FILTERS_DISABLED){

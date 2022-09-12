@@ -8,7 +8,7 @@
     idiomReplaceX.ui(clientScriptsBaseUrl);
     var debug = false;
     idiomReplaceX.extractTextBlocks(debug);
-    idiomReplaceX.requestForReplaceX();
+    // idiomReplaceX.requestForReplaceX(); // now called in idiomReplaceX.fetchMethodOptions()
   };
   script.src = clientScriptsBaseUrl + 'js/idiomReplaceX.js';
   d.getElementsByTagName('head')[0].appendChild(script);
