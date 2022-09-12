@@ -30,6 +30,7 @@
 
   let methodSelectElement = null;
   let defaultFilter = undefined;
+  let methodDataList = [];
 
   /**
    * Global function to add the idiomReplaceX UI to a web page.
@@ -65,7 +66,10 @@
   }
 
   let fetchMethodOptions = function(baseURL, selectElement){
-    jsonQuery("GET",  "methods", null, function(jsonData){
+    jsonQuery("GET",  "v2/methods", null, function(jsonData){
+
+      methodDataList = jsonData;
+
       selectElement.innerHTML = "";
 
       let option = document.createElement("option");
@@ -73,7 +77,8 @@
       option.innerText = FILTERS_DISABLED;
       selectElement.appendChild(option);
 
-      jsonData.forEach(function(methodName){
+      methodDataList.forEach(function(methodData){
+        let methodName = methodData.name;
         if(defaultFilter == undefined){
           defaultFilter = methodName;
         }
