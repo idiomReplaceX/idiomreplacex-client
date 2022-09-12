@@ -30,6 +30,7 @@
 
   let methodSelectElement = null;
   let defaultFilter = undefined;
+  let metadataDiv = null;
   let methodDataList = [];
 
   /**
@@ -50,17 +51,30 @@
       '<label for="idiomreplacex-method"><a href="https://idiomreplacex.de">IdiomReplaceX</a> method:</label>' +
       '<form><select id="idiomreplacex-method" name="method">' +
       '<option value="" selected>initializing ...</option>' +
-      '</select></form></div></section>';
+      '</select><div id="idiomreplacex-metadata"></div></form></div></section>';
     bar.querySelector("#idiomreplacex-logo-container").addEventListener('click', function(event){
       bar.style.left = bar.style.left == '-80px' ? '-300px' : '-80px';
     });
     document.body.appendChild(bar);
     methodSelectElement = bar.querySelector("#idiomreplacex-method");
+    metadataDiv = bar.querySelector("#idiomreplacex-metadata");
     fetchMethodOptions(baseURL, methodSelectElement);
     methodSelectElement.addEventListener('change', function(event){
       if(getCookie(cookieName) !== event.target.value){
         setCookie(cookieName, event.target.value, 10);
-          bindTo.idiomReplaceX.requestForReplaceX();
+        metadataDiv.innerText = '';
+        let methodData = methodDataList.find(function(item){
+          return item.name == event.target.value;
+        });
+        if(methodData){
+          if (methodData.author){
+            metadataDiv.innerText = 'by ' + methodData.author;
+          }
+          if (methodData.year){
+            metadataDiv.innerText += ' ' + methodData.year;
+          }
+        }
+        bindTo.idiomReplaceX.requestForReplaceX();
       }
     })
   }
