@@ -373,7 +373,7 @@
     console.info("applying filter method: " + filter);
     if(filter && filter !== FILTERS_DISABLED){
       Object.values(bindTo.idiomReplaceX.relevantTextBlocks).forEach(function (textBlock) {
-        let payload = JSON.stringify({'html': textBlock.node.innerHTML.normalize(), 'htmlChecksum' : textBlock.htmlChecksum});
+        let payload = JSON.stringify({'html': textBlock.node.innerHTML.normalize(), 'htmlChecksum' : textBlock.htmlChecksum, 'documentUrlId' : b_crc32(document.URL)});
         let serviceMethod = "filter";
         if(filter){
           serviceMethod += '/' + filter;
