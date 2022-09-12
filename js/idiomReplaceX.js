@@ -26,8 +26,8 @@
     };
   }
 
+  let serviceBaseURL = null;
   let cookieName= "idiomReplaceXMethod";
-
   let methodSelectElement = null;
   let defaultFilter = undefined;
   let metadataDiv = null;
@@ -39,6 +39,7 @@
    * @param baseURL the base URLs of the location where the idiomreplacex-client scripts are hosted
    */
   bindTo.idiomReplaceX.ui = function(baseURL) {
+    serviceBaseURL = baseURL;
     var styleEl = document.createElement('link');
     styleEl.setAttribute("rel", "stylesheet");
     styleEl.setAttribute("type", "text/css");
@@ -58,6 +59,7 @@
     document.body.appendChild(bar);
     methodSelectElement = bar.querySelector("#idiomreplacex-method");
     metadataDiv = bar.querySelector("#idiomreplacex-metadata");
+    // TODO use bindTo.idiomReplaceX.filterServiceBaseUrl instead of baseURL ???
     fetchMethodOptions(baseURL, methodSelectElement);
     methodSelectElement.addEventListener('change', function(event){
       if(getCookie(cookieName) !== event.target.value){
@@ -371,6 +373,7 @@
     if(filter === undefined){
       filter = defaultFilter;
     }
+    // set author information
     metadataDiv.innerText = '';
     let methodData = methodDataList.find(function(item){
       return item.name == filter;
@@ -382,7 +385,22 @@
       if (methodData.year){
         metadataDiv.innerText += ' ' + methodData.year;
       }
+      // set method css
+      if(methodData.cssFile){
+        let methodCssElement = document.createElement('link');
+        methodCssElement.setAttribute('id', 'idiomreplacex-css');
+        methodCssElement.setAttribute('rel', 'stylesheet');
+        methodCssElement.setAttribute('type', 'text/css');
+        methodCssElement.setAttribute('href',  bindTo.idiomReplaceX.filterServiceBaseUrl + 'css/' + methodData.cssFile);
+        document.head.appendChild(methodCssElement);
+      } else {
+        let methodCssElement = document.head.querySelector('#idiomreplacex-css');
+        if(methodCssElement){
+          methodCssElement.parentNode.removeChild(methodCssElement);
+        }
+      }
     }
+    // apply filter method
     console.info("applying filter method: " + filter);
     if(filter && filter !== FILTERS_DISABLED){
       Object.values(bindTo.idiomReplaceX.relevantTextBlocks).forEach(function (textBlock) {
