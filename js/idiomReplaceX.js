@@ -380,7 +380,7 @@
     });
     if(methodData){
       if (methodData.author){
-        metadataDiv.innerText = 'by ' + methodData.author;
+        metadataDiv.innerText = methodData.author;
       }
       if (methodData.year){
         metadataDiv.innerText += ' ' + methodData.year;
