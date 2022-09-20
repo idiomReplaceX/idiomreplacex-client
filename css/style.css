@@ -11,7 +11,7 @@
  */
 
 #idiomReplaceXUI {
-    background-color: #FCF8FC;
+    background-color: #ffed10;
     color: #2B3F40;
     position: fixed;
     top: 75vh;
@@ -20,14 +20,15 @@
 
     z-index: 2147483647; /* allowed max value, see https://stackoverflow.com/questions/491052/minimum-and-maximum-value-of-z-index */
     border-radius: 0px 20px 20px 0px;
-    box-shadow: 0px 0px 30px #CA0D9B70;
+    box-shadow: 0px 0px 30px #ffed10;
 }
 
 #idiomReplaceXUI a, #idiomReplaceXUI a:visited, #idiomReplaceXUI a:active {
-    color: #CA0D9B;
+    color: #000;
 }
 #idiomReplaceXUI a:hover {
-    color: #3E8698;
+    text-decoration: underline;
+    color: #000;
 }
 
 #idiomReplaceXUI section {
@@ -43,7 +44,8 @@
     padding-left: 20px;
 }
 #idiomReplaceXUI select {
-    width: 200px;
+    width: 185px;
+    margin-right: 15px;
     font-size: 20px;
 }
 
@@ -65,7 +67,7 @@
 }
 
 #idiomReplaceXUI img.irx-logo:hover {
-    filter: invert(1);
+    filter: invert(0.3);
     cursor: pointer;
 }
 
